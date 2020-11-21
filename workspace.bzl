@@ -85,7 +85,7 @@ cc_import(
 )
 """
     elif lower_name.startswith("mac os x"):
-        path = "/opt/local/include/"
+        path = "/usr/local/include/"
         build_file_content = """
 cc_library(
   name = "headers",

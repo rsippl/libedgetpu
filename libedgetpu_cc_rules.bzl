@@ -24,7 +24,7 @@ DARWIN_COPTS = [
     "-fvisibility=hidden",
 ]
 DARWIN_LINKOPTS = [
-    "-L/opt/local/lib",
+    "-L/usr/local/lib",
     "-lusb-1.0",
 ]
 DARWIN_OPT_LINKOPTS = []
