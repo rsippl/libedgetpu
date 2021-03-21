@@ -45,11 +45,6 @@ function install_file {
   cp -a "${src}" "${dst}"
 }
 
-if [[ "${EUID}" != 0 ]]; then
-  error "Please use sudo to run as root."
-  exit 1
-fi
-
 if [[ -f /etc/mendel_version ]]; then
   error "Looks like you're using a Coral Dev Board. You should instead use Debian packages to manage Edge TPU software."
   exit 1
@@ -59,6 +54,10 @@ readonly OS="$(uname -s)"
 readonly MACHINE="$(uname -m)"
 
 if [[ "${OS}" == "Linux" ]]; then
+  if [[ "${EUID}" != 0 ]]; then
+    error "Please use sudo to run as root."
+    exit 1
+  fi
   case "${MACHINE}" in
     x86_64)
       HOST_GNU_TYPE=x86_64-linux-gnu
@@ -84,20 +83,13 @@ if [[ "${OS}" == "Linux" ]]; then
 elif [[ "${OS}" == "Darwin" ]]; then
   CPU=darwin
 
-  MACPORTS_PATH_AUTO="$(command -v port || true)"
-  MACPORTS_PATH="${MACPORTS_PATH_AUTO:-/opt/local/bin/port}"
-
   BREW_PATH_AUTO="$(command -v brew || true)"
   BREW_PATH="${BREW_PATH_AUTO:-/usr/local/bin/brew}"
 
-  if [[ -x "${MACPORTS_PATH}" ]]; then
-    DARWIN_INSTALL_COMMAND="${MACPORTS_PATH}"
-    DARWIN_INSTALL_USER="$(whoami)"
-  elif [[ -x "${BREW_PATH}" ]]; then
+  if [[ -x "${BREW_PATH}" ]]; then
     DARWIN_INSTALL_COMMAND="${BREW_PATH}"
-    DARWIN_INSTALL_USER="${SUDO_USER}"
   else
-    error "You need to install either Homebrew or MacPorts first."
+    error "You need to install Homebrew first."
     exit 1
   fi
 else
@@ -135,7 +127,7 @@ case "${USE_MAX_FREQ}" in
 esac
 
 if [[ "${CPU}" == "darwin" ]]; then
-  sudo -u "${DARWIN_INSTALL_USER}" "${DARWIN_INSTALL_COMMAND}" install libusb
+  "${DARWIN_INSTALL_COMMAND}" install libusb
 
   DARWIN_INSTALL_LIB_DIR="$(dirname "$(dirname "${DARWIN_INSTALL_COMMAND}")")/lib"
   LIBEDGETPU_LIB_DIR="/usr/local/lib"

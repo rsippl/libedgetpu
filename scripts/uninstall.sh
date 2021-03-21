@@ -29,11 +29,6 @@ function error {
   echo -e "\033[0;31m${1}\033[0m"  # red
 }
 
-if [[ "${EUID}" != 0 ]]; then
-  error "Please use sudo to run as root."
-  exit 1
-fi
-
 if [[ -f /etc/mendel_version ]]; then
   error "Looks like you're using a Coral Dev Board. You should instead use Debian packages to manage Edge TPU software."
   exit 1
@@ -43,6 +38,10 @@ readonly OS="$(uname -s)"
 readonly MACHINE="$(uname -m)"
 
 if [[ "${OS}" == "Linux" ]]; then
+  if [[ "${EUID}" != 0 ]]; then
+    error "Please use sudo to run as root."
+    exit 1
+  fi
   case "${MACHINE}" in
     x86_64)
       HOST_GNU_TYPE=x86_64-linux-gnu
